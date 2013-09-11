@@ -1,6 +1,8 @@
+# rulers/lib/rulers.rb
 require "rulers/version"
 require "rulers/routing"
-require "rulers/array"
+require "rulers/util"
+require "rulers/dependencies"
 
 module Rulers
   class Application
@@ -11,7 +13,12 @@ module Rulers
       
       klass, action = get_controller_and_action(env)
       controller = klass.new(env)
-      reponse_body = controller.send(action)
+      begin
+        reponse_body = controller.send(action)
+      rescue Exception => e
+        return [500, {'Content-Type' => 'text/html'}, ["Error occurred."]]
+      end
+      
       [200, {'Content-Type' => 'text/html'}, [reponse_body]]
     end
   end
