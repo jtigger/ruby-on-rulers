@@ -1,9 +1,6 @@
 # rulers/lib/rulers.rb
-require "rulers/version"
-require "rulers/routing"
-require "rulers/util"
-require "rulers/dependencies"
-require "rulers/controller"
+require "require_all"
+require_rel "rulers"
 
 module Rulers
   class Application
