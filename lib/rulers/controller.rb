@@ -19,7 +19,14 @@ module Rulers
     def render(view_name, locals = {})
       template = get_template_contents view_name
       eruby = Erubis::Eruby.new template
-      eruby.result locals.merge :env => env
+      
+      template_context = locals
+      self.instance_variables.each { |ivar_name|
+        template_context[ivar_name.to_s.delete("@").to_sym] = self.instance_variable_get(ivar_name) 
+      }
+      template_context.merge! :env => env
+
+      eruby.result template_context
     end
     
     def name

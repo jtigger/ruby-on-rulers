@@ -64,3 +64,25 @@ class ExceptionController < Rulers::Controller
     raise "Mock exception."
   end
 end
+
+
+class RulersAppTest
+  def test_WHEN_an_instance_variable_is_declared_on_the_controller_THEN_that_value_is_available_in_the_view
+    get "/parameterized/index"
+    
+    assert_equal "The answer to life, The Universe, and everything is 42.", last_response.body
+  end
+end
+class ParameterizedController < Rulers::Controller
+  def initialize(args)
+    @some_ivar = 42
+  end
+  
+  def index
+    render :view
+  end
+  
+  def get_template_contents(view_name)
+    "The answer to life, The Universe, and everything is <%= some_ivar %>."
+  end
+end
