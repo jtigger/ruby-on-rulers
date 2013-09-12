@@ -8,19 +8,21 @@ require "rulers/controller"
 module Rulers
   class Application
     def call(env)
-      if env['PATH_INFO'] == '/favicon.ico'
+      case env['PATH_INFO']
+      when '/favicon.ico'
         return [404, {'Content-Type' => 'text/html'}, []]
+      when '/'
+        return [302, {'Location' => '/home/index'}, []]
+      else
+        klass, action = get_controller_and_action(env)
+        controller = klass.new(env)
+        begin
+          reponse_body = controller.send(action)
+          [200, {'Content-Type' => 'text/html'}, [reponse_body]]
+        rescue Exception => e
+          return [500, {'Content-Type' => 'text/html'}, [e.inspect]]
+        end
       end
-      
-      klass, action = get_controller_and_action(env)
-      controller = klass.new(env)
-      begin
-        reponse_body = controller.send(action)
-      rescue Exception => e
-        return [500, {'Content-Type' => 'text/html'}, ["Error occurred."]]
-      end
-      
-      [200, {'Content-Type' => 'text/html'}, [reponse_body]]
     end
   end
 end

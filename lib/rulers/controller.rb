@@ -11,15 +11,19 @@ module Rulers
       @env
     end
     
+    def get_template_contents(view_name)
+      filename = File.join "app", "views", self.name, "#{view_name}.html.erb"
+      File.read filename
+    end
+    
     def render(view_name, locals = {})
-      filename = File.join("app", "views", self.name, "#{view_name}.html.erb")
-      template = File.read(filename)
-      eruby = Erubis::Eruby.new(template)
-      eruby.result(locals.merge(:env => env))
+      template = get_template_contents view_name
+      eruby = Erubis::Eruby.new template
+      eruby.result locals.merge :env => env
     end
     
     def name
-      Rulers.to_underscore self.class.to_s.gsub /Controller$/, ''
+      Rulers.to_snakecase self.class.to_s.gsub /Controller$/, ''
     end
   end
 end

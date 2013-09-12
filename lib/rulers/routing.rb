@@ -12,5 +12,4 @@ module Rulers
       [Object.const_get(controller), action]
     end
   end
-  
 end
