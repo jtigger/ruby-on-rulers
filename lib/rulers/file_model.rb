@@ -24,44 +24,32 @@ module Rulers
       end
       
       def self.find(id)
-        # begin
+        begin
           FileModel.new("#{DB_HOME}/#{id}.json")
-        # rescue Exception => e
-        #   STDERR.puts e.inspect
-        #   return nil
-        # end
+        rescue Exception => e
+          STDERR.puts "WARNING: fetch for Model \##{id} failed. \n" + e.inspect + "\n" + e.backtrace.join("\n  ")
+          return nil
+        end
       end
       
       def self.find_all
-        files = Dir["#{DB_HOME}/*.json"]
-        files.map { |file| FileModel.new file }
+        Dir["#{DB_HOME}/*.json"].map { |file| FileModel.new file }
       end
       
       def self.create(attrs)
-        record = FileModel.generate_record_from attrs
         id = get_next_id
-        
-        File.open("#{DB_HOME}/#{id}.json", "w") do |file|
-          json = FileModel.generate_json_from record
-          file.write json
-        end
+        persist id, FileModel.generate_record_from(attrs)
         FileModel.find(id)
       end
       
       def save
-        File.open("#{DB_HOME}/#{@id}.json", "w") do |file|
-          json = FileModel.generate_json_from @hash
-          file.write json
-        end
-        
-        self
+        FileModel.persist @id, @hash
       end
       
     protected
       
       def self.get_next_id
-        pathnames = Dir["#{DB_HOME}/*.json"]
-        max_id = pathnames.map { |pathname| FileModel.get_id_from_pathname(pathname) }.max
+        max_id = Dir["#{DB_HOME}/*.json"].map { |pathname| FileModel.get_id_from_pathname(pathname) }.max
         id = max_id + 1
       end
       
@@ -74,21 +62,14 @@ module Rulers
         record["quote"] = attrs["quote"] || ""
         record["attribution"] = attrs["attribution"] || ""
         record["submitter"] = attrs["submitter"] || ""
-        
         record
       end
       
-      def self.generate_json_from(record)
-        json = <<TEMPLATE
-{
-"submitter" : "#{record["submitter"]}",
-"quote" : "#{record["quote"]}",
-"attribution" : "#{record["attribution"]}"
-}
-TEMPLATE
-        json
-      end
-         
+      def self.persist(id, data)
+        File.open("#{DB_HOME}/#{id}.json", "w") do |file|
+          file.write MultiJson.dump(data)
+        end
+      end         
     end
   end
 end
