@@ -21,6 +21,16 @@ module Rulers
       end
       
       def []=(name, value)
+        @hashp[name.to_s] = value
+      end
+      
+      def self.find(id)
+        begin
+          FileModel.new("db/quotes/#{id}.json")
+        rescue Exception => e
+          STDERR.puts e.inspect
+          return nil
+        end
       end
     end
   end
