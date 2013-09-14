@@ -20,7 +20,7 @@ module Rulers
       end
       
       def []=(name, value)
-        @hashp[name.to_s] = value
+        @hash[name.to_s] = value
       end
       
       def self.find(id)
@@ -38,24 +38,23 @@ module Rulers
       end
       
       def self.create(attrs)
-        record = {}
-        record["quote"] = attrs["quote"] || ""
-        record["attribution"] = attrs["attribution"] || ""
-        record["submitter"] = attrs["submitter"] || ""
-        
+        record = FileModel.generate_record_from attrs
         id = get_next_id
         
         File.open("#{DB_HOME}/#{id}.json", "w") do |file|
-          record = <<TEMPLATE
-{
-  "submitter" : "#{record["submitter"]}",
-  "quote" : "#{record["quote"]}",
-  "attribution" : "#{record["attribution"]}"
-}
-TEMPLATE
-          file.write record
+          json = FileModel.generate_json_from record
+          file.write json
         end
         FileModel.find(id)
+      end
+      
+      def save
+        File.open("#{DB_HOME}/#{@id}.json", "w") do |file|
+          json = FileModel.generate_json_from @hash
+          file.write json
+        end
+        
+        self
       end
       
     protected
@@ -68,6 +67,26 @@ TEMPLATE
       
       def self.get_id_from_pathname(pathname)
         File.basename(File.split(pathname)[-1], '.json').to_i
+      end
+      
+      def self.generate_record_from(attrs)
+        record = {}
+        record["quote"] = attrs["quote"] || ""
+        record["attribution"] = attrs["attribution"] || ""
+        record["submitter"] = attrs["submitter"] || ""
+        
+        record
+      end
+      
+      def self.generate_json_from(record)
+        json = <<TEMPLATE
+{
+"submitter" : "#{record["submitter"]}",
+"quote" : "#{record["quote"]}",
+"attribution" : "#{record["attribution"]}"
+}
+TEMPLATE
+        json
       end
          
     end

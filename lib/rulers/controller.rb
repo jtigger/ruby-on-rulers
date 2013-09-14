@@ -5,12 +5,12 @@ require "rulers/file_model"
 module Rulers
   class Controller
     include Rulers::Model
-    def initialize(env)
-      @env = env
+    def initialize(request)
+      @request = request
     end
 
-    def env
-      @env
+    def request
+      @request
     end
     
     def get_template_contents(view_name)
@@ -26,7 +26,7 @@ module Rulers
       self.instance_variables.each { |ivar_name|
         template_context[ivar_name.to_s.delete("@").to_sym] = self.instance_variable_get(ivar_name) 
       }
-      template_context.merge! :env => env
+      template_context[:request] = request
 
       eruby.result template_context
     end
