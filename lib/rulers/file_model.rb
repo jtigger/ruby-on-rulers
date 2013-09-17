@@ -5,9 +5,20 @@ module Rulers
   module Model
     class FileModel
       DB_HOME = "db/quotes"
+
+      @@cache = {}
+      
+      def FileModel.new(pathname)
+        @id = FileModel.get_id_from_pathname(pathname)
+        if !@@cache[@id]
+          @@cache[@id] = super
+        end
+        @@cache[@id]
+      end
+      
       def initialize(pathname)
         @id = FileModel.get_id_from_pathname(pathname)
-        @pathname = pathname  
+        @pathname = pathname
         @hash = MultiJson.load fetch_data(pathname)
       end
       
@@ -25,7 +36,7 @@ module Rulers
       
       def self.find(id)
         begin
-          FileModel.new("#{DB_HOME}/#{id}.json")
+          self.new("#{DB_HOME}/#{id}.json")
         rescue Exception => e
           STDERR.puts "WARNING: fetch for Model \##{id} failed. \n" + e.inspect + "\n" + e.backtrace.join("\n  ")
           return nil

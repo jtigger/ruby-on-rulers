@@ -44,4 +44,11 @@ class RulersModelTest < Test::Unit::TestCase
     assert_not_nil hash, "@hash was not set in model"
     assert_equal TestModel.sample_data, hash
   end
+  
+  def test_FileModel_caches_instances_of_models
+    first_record = TestModel.find(1)
+    first_record_again = TestModel.find(1)
+    
+    assert_same first_record, first_record_again, "Expected both instances would be the exact same object"
+  end
 end

@@ -18,12 +18,12 @@ module Rulers
         else
           klass, action = get_controller_and_action(request)
           controller = klass.new(request)
-          # begin
+          begin
             reponse_body = controller.send(action)
             [200, {'Content-Type' => 'text/html'}, [reponse_body]]
-          # rescue Exception => e
-          #   return [500, {'Content-Type' => 'text/html'}, [e.inspect]]
-          # end
+          rescue Exception => e
+            return [500, {'Content-Type' => 'text/html'}, [e.inspect]]
+          end
       end
     end
   end
