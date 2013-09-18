@@ -47,6 +47,24 @@ module Rulers
         Dir["#{DB_HOME}/*.json"].map { |file| FileModel.new file }
       end
       
+      def self.find_all_by(criteria = {})
+        find_all.select { |model| 
+          criteria.inject(true) { | so_far, criterion |
+            model[criterion[0]] == criterion[1]
+          }
+        }
+      end
+      
+      def self.method_missing(method_sym, *args, &block)
+        if method_sym.to_s =~ /find_all_by_(.*)$/
+          attribute = $1
+          value = args[0]
+          find_all_by({attribute => value})
+        else
+          super
+        end
+      end
+      
       def self.create(attrs)
         id = get_next_id
         persist id, FileModel.generate_record_from(attrs)
