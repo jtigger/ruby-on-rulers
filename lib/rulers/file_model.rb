@@ -52,13 +52,14 @@ module Rulers
       end
       
       def self.find_all_by(criteria = {})
-        find_all.select { |model| 
-          criteria.inject(true) { | so_far, (key, value)  |
-            so_far && model[key] == value
-          }
+        find_all.select { |model|
+          criteria.all? { | key, value |
+            model[key] == value
+          } 
         }
       end
       
+      #TODO: implement "responds_to?"
       def self.method_missing(method_sym, *args, &block)
         if method_sym.to_s =~ /find_all_by_(.*)$/
           attribute = $1
