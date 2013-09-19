@@ -86,3 +86,14 @@ class ParameterizedController < Rulers::Controller
     "The answer to life, The Universe, and everything is <%= some_ivar %>."
   end
 end
+
+class RulersAppTest
+  def test_WHEN_request_includes_posted_params_THEN_application_has_those_params
+    expected_params = { "foo" => "bar" }
+    post "/posting/index", expected_params
+    
+    assert_equal expected_params, last_request.params
+  end
+end
+class PostingController < Rulers::Controller
+end

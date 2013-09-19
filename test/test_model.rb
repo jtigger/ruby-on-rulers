@@ -33,19 +33,6 @@ class TestModel < Rulers::Model::FileModel
     _ = @@sample_data[id]
   end
     
-  def hash_to_json(hash)
-    json = "{"
-    hash.each_with_index { | elem, index | 
-      json += "\"" + elem[0].to_s + "\": "
-      json += "\"" + elem[1].to_s + "\""
-      
-      if (index < hash.length-1)
-        json += ","
-      end
-    }
-    json += "}"
-  end  
-
   def self.warmup_cache_with_sample_data
     (0..@@sample_data.count-1).each { |id| TestModel.new("db/quotes/#{id}.json") }
   end
@@ -53,7 +40,7 @@ class TestModel < Rulers::Model::FileModel
   def fetch_data(pathname)
     id = Rulers::Model::FileModel.get_id_from_pathname pathname
     data = TestModel.sample_data id
-    hash_to_json data
+    MultiJson.dump data
   end
 
   def self.find_all
@@ -100,5 +87,12 @@ class RulersModelTest < Test::Unit::TestCase
     models = TestModel.find_all_by_attribution "Woody Allen"
 
     assert_equal 1, models.size, "Expected to fetch 1 quote attributed to Woody Allen"
+  end
+  
+  def test_supplying_multiple_criteria_properly_selects_the_right_models
+    models = TestModel.find_all_by( { "submitter" => "Jeff", "attribution" => "Anonymous"})
+    
+    assert_equal 1, models.size
+    assert_equal "37% of all statistics are made up on the spot.", models[0]["quote"]
   end
 end

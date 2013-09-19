@@ -8,6 +8,10 @@ module Rulers
 
       @@cache = {}
       
+      def self.clear_cache
+        @@cache = {}  
+      end
+      
       def FileModel.new(pathname)
         @id = FileModel.get_id_from_pathname(pathname)
         if !@@cache[@id]
@@ -49,8 +53,8 @@ module Rulers
       
       def self.find_all_by(criteria = {})
         find_all.select { |model| 
-          criteria.inject(true) { | so_far, criterion |
-            model[criterion[0]] == criterion[1]
+          criteria.inject(true) { | so_far, (key, value)  |
+            so_far && model[key] == value
           }
         }
       end
