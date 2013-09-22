@@ -4,7 +4,7 @@ module Rulers
   class Application
     def get_controller_and_action(request)
       _, controller, action, after = 
-        request.fullpath.split("/", 4)
+        request.path.split("/", 4)
         
       controller = controller.capitalize   # "People"
       controller += "Controller"           # "PeopleController"

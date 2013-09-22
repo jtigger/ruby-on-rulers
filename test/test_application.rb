@@ -3,6 +3,24 @@ require_relative "test_helper"
 class TestApp < Rulers::Application
 end
 
+# Aspect that captures when the controller is constructed, allowing our tests to inspect the controller that processed the request.
+module Rulers
+  class Controller
+    @@latest = nil
+    
+    # Idiom: clean method override; see also: https://gist.github.com/jtigger/6660651#file-clean_method_override-rb
+    old_initialize = instance_method(:initialize)
+    define_method(:initialize) do |*args|
+      old_initialize.bind(self).(*args)
+      @@latest = self
+    end
+    
+    def self.latest
+      @@latest
+    end
+  end
+end
+
 class RulersAppTest < Test::Unit::TestCase
   include Rack::Test::Methods
   
@@ -14,6 +32,16 @@ class RulersAppTest < Test::Unit::TestCase
     get '/favicon.ico'
     
     assert_equal 404, last_response.status
+  end
+  
+  def test_WHEN_params_are_included_in_the_get_THEN_those_are_available_from_the_controller
+    get '/testing/show?id=1'
+    
+    assert_equal '1', Rulers::Controller.latest.request.params["id"]
+  end
+end
+class TestingController < Rulers::Controller
+  def show
   end
 end
 
@@ -97,3 +125,6 @@ class RulersAppTest
 end
 class PostingController < Rulers::Controller
 end
+
+
+

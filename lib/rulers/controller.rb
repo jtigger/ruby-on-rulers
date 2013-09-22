@@ -5,6 +5,7 @@ require "rulers/file_model"
 module Rulers
   class Controller
     include Rulers::Model
+
     def initialize(request)
       @request = request
     end
