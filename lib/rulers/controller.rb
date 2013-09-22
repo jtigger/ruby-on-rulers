@@ -14,6 +14,10 @@ module Rulers
       @request
     end
     
+    def params
+      @request.params
+    end
+    
     def get_template_contents(view_name)
       filename = File.join "app", "views", self.name, "#{view_name}.html.erb"
       File.read filename
