@@ -20,9 +20,15 @@ module Rulers
           controller = klass.new(request)
           begin
             reponse_body = controller.send(action)
-            [200, {'Content-Type' => 'text/html'}, [reponse_body]]
+            if controller.response
+              status, header, response = controller.response.to_a
+              [status, header, [response.body].flatten]
+            else
+              [200, {'Content-Type' => 'text/html'}, [reponse_body]]
+            end
           rescue Exception => e
-            return [500, {'Content-Type' => 'text/html'}, [e.inspect]]
+            error_html = "<pre>" + e.message + "\n" + e.backtrace.join("\n") + "</pre>"
+            return [500, {'Content-Type' => 'text/html'}, [error_html]]
           end
       end
     end

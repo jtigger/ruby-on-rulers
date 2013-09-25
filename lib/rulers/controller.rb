@@ -14,13 +14,26 @@ module Rulers
       @request
     end
     
+    def response
+      @response
+    end
+    
     def params
       @request.params
+    end
+    
+    def name
+      Rulers.to_snakecase self.class.to_s.gsub /Controller$/, ''
     end
     
     def get_template_contents(view_name)
       filename = File.join "app", "views", self.name, "#{view_name}.html.erb"
       File.read filename
+    end
+    
+    def render_response(*args)
+      response_body = render(*args)
+      respond(response_body)
     end
     
     def render(view_name, locals = {})
@@ -36,8 +49,12 @@ module Rulers
       eruby.result template_context
     end
     
-    def name
-      Rulers.to_snakecase self.class.to_s.gsub /Controller$/, ''
+    def respond(text, status = 200, headers = {})
+      raise "Attempting to respond to a request that was already responded to. " +
+            "(existing response = #{response.inspect}; this response text = #{text})" if @response
+            
+      body = [text].flatten
+      @response = Rack::Response.new(body, status, headers)
     end
   end
 end
