@@ -5,7 +5,7 @@ module Rulers
     def get_controller_and_action(request)
       _, controller_name, action, after = 
         request.path.split("/", 4)
-        
+      
       controller_name = controller_name.to_camel_case  # "MyPeople"
       controller_name += "Controller"                  # "MyPeopleController"
       

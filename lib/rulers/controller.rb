@@ -36,7 +36,8 @@ module Rulers
       respond(response_body)
     end
     
-    def render(view_name, locals = {})
+    def render(view_name = nil, locals = {})
+      view_name ||= name
       template = get_template_contents view_name
       eruby = Erubis::Eruby.new template
       

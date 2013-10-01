@@ -126,5 +126,24 @@ end
 class PostingController < Rulers::Controller
 end
 
+class RulersAppTest
+  def test_WHEN_action_does_not_render_explicitly_THEN_Rulers_renders_the_default_view
+    get "/default_render/index"
+    
+    assert_equal DefaultRenderController::MESSAGE, last_response.body
+  end
+end
+class DefaultRenderController < Rulers::Controller
+  MESSAGE = "Bob Ross loves you."
+  def index
+    @new_instance_var = MESSAGE
+    return nil
+  end
+  
+  # mock-out loading template.
+  def get_template_contents(view_name)
+    "<%= new_instance_var %>"
+  end
+end
 
 
