@@ -1,7 +1,7 @@
 
 class String
-  def to_camelcase
-    
+  def to_camel_case
+    split(/[_ ]/).map { |word| word.capitalize }.join ''
   end
   
   def to_snake_case
