@@ -1,4 +1,4 @@
-# lib/rulers/file_model.rb
+# lib/rulers/model/file_model.rb
 require "multi_json"
 
 module Rulers

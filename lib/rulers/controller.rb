@@ -1,6 +1,6 @@
 # lib/rules/controller.rb
 require "erubis"
-require "rulers/file_model"
+require "rulers/model"
 
 module Rulers
   class Controller
