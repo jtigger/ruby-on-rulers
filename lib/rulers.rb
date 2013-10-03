@@ -20,7 +20,7 @@ module Rulers
           controller = klass.new(request)
           begin
             response_body = controller.send(action)
-            controller.render_response unless response_body
+            controller.render_response action unless response_body
             if controller.response
               status, header, response = controller.response.to_a
               [status, header, [response.body].flatten]
