@@ -1,4 +1,4 @@
-# test/model.rb
+# test/test_model.rb
 require_relative "test_helper"
 
 class TestModel < Rulers::Model::FileModel
