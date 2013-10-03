@@ -128,21 +128,36 @@ end
 
 class RulersAppTest
   def test_WHEN_action_does_not_render_explicitly_THEN_Rulers_renders_the_default_view
-    get "/default_render/index"
+    get "/default_render/for_action"
     
+    assert_equal "for_action", DefaultRenderController.latest.rendered_view
     assert_equal DefaultRenderController::MESSAGE, last_response.body
+  end
+  
+  def test_WHEN_Rulers_renders_the_default_view__the_action_is_the_name_of_the_view
+    get "/default_render/for_other_action"
+    
+    assert_equal "for_other_action", DefaultRenderController.latest.rendered_view
   end
 end
 class DefaultRenderController < Rulers::Controller
   MESSAGE = "Bob Ross loves you."
-  def index
+  def for_action
     @new_instance_var = MESSAGE
     return nil
   end
   
+  def for_other_action
+  end
+  
   # mock-out loading template.
   def get_template_contents(view_name)
+    @rendered_view = view_name
     "<%= new_instance_var %>"
+  end
+  
+  def rendered_view
+    @rendered_view
   end
 end
 
