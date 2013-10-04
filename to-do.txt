@@ -1,3 +1,5 @@
 
 
-[ ] 
+SQLiteModel
+[x] Add logic to connect to a given database.
+[ ] Add check to make sure we're connected before doing anything.

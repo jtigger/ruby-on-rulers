@@ -19,7 +19,7 @@ class RulersSQLiteModelTest < Test::Unit::TestCase
       name   VARCHAR(30)
     );
 __
-    
+    TestSqliteModel.connect database_filename
   end
   
   def teardown
@@ -28,6 +28,11 @@ __
   
   def test_Model_classname_matches_backing_table_name
     assert_equal "test_sqlite", TestSqliteModel.table
+  end
+    
+  def test_Model_reads_the_schema_straight_from_the_database
+    expected_schema = { "id" => "INTEGER", "name" => "VARCHAR(30)"}
+    assert_equal expected_schema, TestSqliteModel.schema
   end
 end
 
