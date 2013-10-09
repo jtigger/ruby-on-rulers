@@ -3,9 +3,39 @@
 module Rulers
   module Model
     
+    # Generates valid SQL strings, suitable to execute against a SQLite database.
+    class SQLiteDialect
+      def initialize(schema)
+        @schema = schema
+      end
+      
+      def to_sql(value)
+        case value
+        when Hash
+          keys = @schema.keys - ["id"]
+          keys.map do |key|
+            value_for_key = value[key]
+            value_for_key = value[key.to_sym] if !value_for_key
+            to_sql(value_for_key)
+          end
+        when Numeric
+          value.to_s
+        when String
+          "'#{value}'"
+        when nil
+          "NULL"
+        else
+          raise "Unable to map #{value.class} to SQL."
+        end
+      end
+      
+      
+    end
+    
     class SQLiteModel
       def self.connect(path_to_db)
         @db = SQLite3::Database.new path_to_db
+        @dialect = SQLiteDialect.new schema
       end
       
       def self.table
@@ -30,26 +60,6 @@ module Rulers
         
         insert_sql = sql_for_create Hash[schema.keys.zip(to_sql(values))]
         @db.execute insert_sql
-      end
-      
-      def self.to_sql(value)
-        case value
-        when Hash
-          keys = schema.keys - ["id"]
-          keys.map do |key|
-            value_for_key = value[key]
-            value_for_key = value[key.to_sym] if !value_for_key
-            to_sql(value_for_key)
-          end
-        when Numeric
-          value.to_s
-        when String
-          "'#{value}'"
-        when nil
-          "NULL"
-        else
-          raise "Unable to map #{value.class} to SQL."
-        end
       end
       
       def self.sql_for_create(column_value_pairs)

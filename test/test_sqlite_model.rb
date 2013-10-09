@@ -11,7 +11,7 @@ class RulersSQLiteModelTest < Test::Unit::TestCase
     alias_method :which_means, :setup
   end
 
-  given "a concrete subclass of SQLiteModel, connected to a real table with a few columns on it." do
+  given "a concrete subclass of SQLiteModel, connected to a real table with a few columns on it," do
     which_means do
       @build_test_temp_dir = "build/test"
       database_filename = "#{@build_test_temp_dir}/test.db"
@@ -42,33 +42,39 @@ __
       expected_schema = { "id" => "INTEGER", "name" => "VARCHAR(30)", "age" => "INTEGER", "tagline" => "VARCHAR(80)"}
       assert_equal expected_schema, TestSqliteModel.schema
     end
-  
-    test "When generating SQL, SQLiteModel translates integer values to strings" do
-      assert_equal "42", TestSqliteModel.to_sql(42)
-    end
-  
-    test "When generating SQL, SQLiteModel surrounds strings with single quotes" do
-      assert_equal "'Hello, world!'", TestSqliteModel.to_sql("Hello, world!")
-    end
-  
-    test "When generating SQL, SQLiteModel translates nil to null" do
-      assert_equal "NULL", TestSqliteModel.to_sql(nil)
-    end
-  
-    test "When generating SQL, SQLiteModel escapes hashes of values" do
-      values = { :name => "Lily G", :age => 0, :tagline => "Ooooooooohhh!" }
-      sql_escaped_values = ["'Lily G'", "0", "'Ooooooooohhh!'"]
     
-      assert_equal sql_escaped_values, TestSqliteModel.to_sql(values)
-    end
+    given "and using the SQLiteDialect to generate SQL" do
+      which_means do
+        @dialect = Rulers::Model::SQLiteDialect.new(TestSqliteModel.schema)
+      end
 
-    test "When generating SQL, SQLiteModel inserts null for missing values" do
-      values = { :name => "Lily G",
-               # :age => 0,   -- this value is intentionally removed
-                 :tagline => "Ooooooooohhh!" }
-      sql_escaped_values = ["'Lily G'", "NULL", "'Ooooooooohhh!'"]
-    
-      assert_equal sql_escaped_values, TestSqliteModel.to_sql(values)
+      test "translates integer values to strings" do
+        assert_equal "42", @dialect.to_sql(42)
+      end
+      
+      test "surrounds strings with single quotes" do
+        assert_equal "'Hello, world!'", @dialect.to_sql("Hello, world!")
+      end
+
+      test "translates nil to null" do
+        assert_equal "NULL", @dialect.to_sql(nil)
+      end
+
+      test "translates entire hashes of values" do
+        values = { :name => "Lily G", :age => 0, :tagline => "Ooooooooohhh!" }
+        sql_escaped_values = ["'Lily G'", "0", "'Ooooooooohhh!'"]
+
+        assert_equal sql_escaped_values, @dialect.to_sql(values)
+      end
+      
+      test "when translating hashes, inserts null for missing values" do
+        values = { :name => "Lily G",
+                 # :age => 0,   -- this value is intentionally removed
+                   :tagline => "Ooooooooohhh!" }
+        sql_escaped_values = ["'Lily G'", "NULL", "'Ooooooooohhh!'"]
+
+        assert_equal sql_escaped_values, @dialect.to_sql(values)
+      end
     end
   
     test "When generating SQL, to create a new model SQLiteModel emits a SQL insert" do
