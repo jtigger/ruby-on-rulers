@@ -45,7 +45,7 @@ __
     
     given "and using the SQLiteDialect to generate SQL" do
       which_means do
-        @dialect = Rulers::Model::SQLiteDialect.new(TestSqliteModel.schema)
+        @dialect = Rulers::Model::SQLiteDialect.new(TestSqliteModel.table, TestSqliteModel.schema)
       end
 
       test "translates integer values to strings" do
@@ -75,14 +75,16 @@ __
 
         assert_equal sql_escaped_values, @dialect.to_sql(values)
       end
+
+      test "given a hash of values, generates a valid SQL INSERT statement" do
+        expected_sql = "INSERT INTO test_sqlite (name, age, tagline) values ('Lily G', 0, 'Ooooooooohhh!');"
+        values = { :name => "'Lily G'", :age => '0', :tagline => "'Ooooooooohhh!'" }
+
+        assert_equal expected_sql, @dialect.sql_for_create(values)
+      end
+
     end
   
-    test "When generating SQL, to create a new model SQLiteModel emits a SQL insert" do
-      expected_sql = "INSERT INTO test_sqlite (name, age, tagline) values ('Lily G', 0, 'Ooooooooohhh!');"
-      values = { :name => "'Lily G'", :age => '0', :tagline => "'Ooooooooohhh!'" }
-    
-      assert_equal expected_sql, TestSqliteModel.sql_for_create(values)
-    end
   end
 end
 

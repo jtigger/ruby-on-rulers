@@ -5,7 +5,8 @@ module Rulers
     
     # Generates valid SQL strings, suitable to execute against a SQLite database.
     class SQLiteDialect
-      def initialize(schema)
+      def initialize(table_name, schema)
+        @table_name = table_name
         @schema = schema
       end
       
@@ -29,13 +30,15 @@ module Rulers
         end
       end
       
-      
+      def sql_for_create(column_value_pairs)
+        "INSERT INTO #{@table_name} (#{column_value_pairs.keys.join(", ")}) values (#{column_value_pairs.values.join(", ")});"
+      end
     end
     
     class SQLiteModel
       def self.connect(path_to_db)
         @db = SQLite3::Database.new path_to_db
-        @dialect = SQLiteDialect.new schema
+        @dialect = SQLiteDialect.new table, schema
       end
       
       def self.table
@@ -62,9 +65,6 @@ module Rulers
         @db.execute insert_sql
       end
       
-      def self.sql_for_create(column_value_pairs)
-        "INSERT INTO #{table} (#{column_value_pairs.keys.join(", ")}) values (#{column_value_pairs.values.join(", ")});"
-      end
     end
   end
 end
