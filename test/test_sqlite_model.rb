@@ -11,7 +11,7 @@ class RulersSQLiteModelTest < Test::Unit::TestCase
     alias_method :which_means, :setup
   end
 
-  given "a concrete subclass of SQLiteModel, connected to a real table with a few columns on it," do
+  given "A concrete subclass of SQLiteModel, connected to a real table with a few columns on it," do
     which_means do
       @build_test_temp_dir = "build/test"
       database_filename = "#{@build_test_temp_dir}/test.db"
@@ -38,9 +38,18 @@ __
       assert_equal "test_sqlite", TestSqliteModel.table
     end
     
-    test "reads the schema straight from the database" do
+    test "reads the schema from the database" do
       expected_schema = { "id" => "INTEGER", "name" => "VARCHAR(30)", "age" => "INTEGER", "tagline" => "VARCHAR(80)"}
       assert_equal expected_schema, TestSqliteModel.schema
+    end
+
+    test "reports the count of instances of this model in the database" do
+      assert_equal 0, TestSqliteModel.count
+      @conn.execute_batch <<__
+      INSERT INTO test_sqlite (name, age, tagline) values ('John', 40, 'Nothin but net');
+      INSERT INTO test_sqlite (name, age, tagline) values ('John', 40, 'Nothin but net');
+__
+      assert_equal 2, TestSqliteModel.count
     end
         
     given "and using the SQLiteDialect to generate SQL" do
@@ -83,17 +92,7 @@ __
       end
     end
     
-    test "reports the number of instances of this model in the database" do
-      assert_equal 0, TestSqliteModel.count
-      @conn.execute_batch <<__
-      INSERT INTO test_sqlite (name, age, tagline) values ('John', 40, 'Nothin but net');
-      INSERT INTO test_sqlite (name, age, tagline) values ('John', 40, 'Nothin but net');
-__
-      assert_equal 2, TestSqliteModel.count
-    end
-
-    
-    given "and with a hash of values, create a persisted instance of TestSqliteModel," do
+    given "and with a hash of values, creates a persisted instance of TestSqliteModel," do
       which_means do
         values = { :name => "Lily G", :age => 0, :tagline => "Ooooooooohhh!" }
     
