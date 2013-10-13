@@ -44,7 +44,8 @@ module Rulers
       end
       
       def sql_for_find_by_id(id)
-        "SELECT #{@schema.keys.join(", ")} FROM #{@table_name} WHERE id = #{id}"
+        projection_list = @schema.keys
+        ["SELECT #{projection_list.join(", ")} FROM #{@table_name} WHERE id = #{id}", projection_list]
       end
     end
     
@@ -73,14 +74,20 @@ module Rulers
         self.new({ :id => id }.merge(values))
       end
       
-      def [](attribute)
-        @values[attribute] if @values
+      def self.find_by_id(id)
+        select_sql, projection_list = @dialect.sql_for_find_by_id(id)
+        rows = @db.execute select_sql
+        values = Hash[projection_list.map {|column_name| column_name.to_sym}.zip(rows[0])]
       end
-      
+
       def self.count
         @db.execute(@dialect.sql_for_table_size)[0][0]
       end
-      
+
+      def [](attribute)
+        @values[attribute] if @values
+      end
+            
       protected
       def initialize(values)
         @values = values

@@ -92,7 +92,13 @@ __
       end
       
       test "generates SQL required to fetch a specific row by id" do
-        assert_equal "SELECT id, name, age, tagline FROM test_sqlite WHERE id = 4", @dialect.sql_for_find_by_id(4)
+        sql, projection_list = @dialect.sql_for_find_by_id(4)
+        assert_equal "SELECT id, name, age, tagline FROM test_sqlite WHERE id = 4", sql
+      end
+      test "when generating SQL required to fetch a specific row by id, also returns the projection list" do
+        expected_projection_list = ["id", "name", "age", "tagline"]
+        sql, projection_list = @dialect.sql_for_find_by_id(4)
+        assert_equal expected_projection_list, projection_list
       end
     end
     
@@ -112,6 +118,12 @@ __
         assert_equal "Lily G", @model[:name]
         assert_equal 0, @model[:age]
         assert_equal "Ooooooooohhh!", @model[:tagline]
+      end
+      
+      test "which can be fetched from the database, by id" do
+        fetched_model = TestSqliteModel.find_by_id(@model[:id])
+        assert_not_nil fetched_model, "expected to find the saved model (id = #{@model[:id]}), but got nil instead."
+        assert_equal fetched_model[:id], @model[:id]
       end
     end
   end
