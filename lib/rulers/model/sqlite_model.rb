@@ -42,6 +42,10 @@ module Rulers
       def sql_for_table_size
         "SELECT COUNT(*) from #{@table_name};"
       end
+      
+      def sql_for_find_by_id(id)
+        "SELECT #{@schema.keys.join(", ")} FROM #{@table_name} WHERE id = #{id}"
+      end
     end
     
     class SQLiteModel

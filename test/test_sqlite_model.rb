@@ -90,6 +90,10 @@ __
       test "generates SQL required to get the number of rows in the table" do
         assert_equal "SELECT COUNT(*) from test_sqlite;", @dialect.sql_for_table_size
       end
+      
+      test "generates SQL required to fetch a specific row by id" do
+        assert_equal "SELECT id, name, age, tagline FROM test_sqlite WHERE id = 4", @dialect.sql_for_find_by_id(4)
+      end
     end
     
     given "and with a hash of values, creates a persisted instance of TestSqliteModel," do
