@@ -13,12 +13,13 @@ module Rulers
       def to_sql(value)
         case value
         when Hash
-          keys = @schema.keys - ["id"]
-          keys.map do |key|
-            value_for_key = value[key]
-            value_for_key = value[key.to_sym] if !value_for_key
-            to_sql(value_for_key)
+          quoted_values = value.keys.map do |key|
+            if @schema.keys.include?(key.to_s) || @schema.keys.include?(key.to_sym)
+              value_for_key = value[key]
+              [key, to_sql(value_for_key)]
+            end
           end
+          Hash[quoted_values]
         when Numeric
           value.to_s
         when String
@@ -26,12 +27,16 @@ module Rulers
         when nil
           "NULL"
         else
-          raise "Unable to map #{value.class} to SQL."
+          raise "Unable to map #{value} (an instance of #{value.class}) to SQL."
         end
       end
       
       def sql_for_create(column_value_pairs)
         "INSERT INTO #{@table_name} (#{column_value_pairs.keys.join(", ")}) values (#{column_value_pairs.values.join(", ")});"
+      end
+      
+      def sql_for_get_id
+        "SELECT last_insert_rowid();"
       end
     end
     
@@ -54,15 +59,11 @@ module Rulers
       end
       
       def self.create(values)
-        # SQL escape values
-        # generate SQL for insert
-        # execute insert
-        # obtain ID    select_rowid_sql = "SELECT last_insert_rowid();"; @db.execute select_rowid_sql
-        # "unescape" SQL into Model values
-        # scatter results into an Model instance variables
-        
-        insert_sql = sql_for_create Hash[schema.keys.zip(to_sql(values))]
+        insert_sql = @dialect.sql_for_create Hash[schema.keys.zip(@dialect.to_sql(values))]
+        puts insert_sql
         @db.execute insert_sql
+        id = @db.execute(@dialect.sql_for_get_id)[0][0]
+        self.new
       end
       
     end

@@ -34,11 +34,11 @@ __
       `rm -rf #{@build_test_temp_dir}`
     end
     
-    test "SQLiteModel assumes the backing table matches the classname" do
+    test "assumes the backing table matches the classname" do
       assert_equal "test_sqlite", TestSqliteModel.table
     end
     
-    test "SQLiteModel reads the schema straight from the database" do
+    test "reads the schema straight from the database" do
       expected_schema = { "id" => "INTEGER", "name" => "VARCHAR(30)", "age" => "INTEGER", "tagline" => "VARCHAR(80)"}
       assert_equal expected_schema, TestSqliteModel.schema
     end
@@ -60,31 +60,34 @@ __
         assert_equal "NULL", @dialect.to_sql(nil)
       end
 
-      test "translates entire hashes of values" do
+      test "translates hashes into hashes of translated values" do
         values = { :name => "Lily G", :age => 0, :tagline => "Ooooooooohhh!" }
-        sql_escaped_values = ["'Lily G'", "0", "'Ooooooooohhh!'"]
+        sql_escaped_values = { :name => "'Lily G'", :age => "0", :tagline => "'Ooooooooohhh!'"}
 
         assert_equal sql_escaped_values, @dialect.to_sql(values)
       end
       
-      test "when translating hashes, inserts null for missing values" do
-        values = { :name => "Lily G",
-                 # :age => 0,   -- this value is intentionally removed
-                   :tagline => "Ooooooooohhh!" }
-        sql_escaped_values = ["'Lily G'", "NULL", "'Ooooooooohhh!'"]
-
-        assert_equal sql_escaped_values, @dialect.to_sql(values)
-      end
-
-      test "given a hash of values, generates a valid SQL INSERT statement" do
+      test "given a hash of translated values, generates a valid SQL INSERT statement" do
         expected_sql = "INSERT INTO test_sqlite (name, age, tagline) values ('Lily G', 0, 'Ooooooooohhh!');"
-        values = { :name => "'Lily G'", :age => '0', :tagline => "'Ooooooooohhh!'" }
+        translated_values = { :name => "'Lily G'", :age => '0', :tagline => "'Ooooooooohhh!'" }
 
-        assert_equal expected_sql, @dialect.sql_for_create(values)
+        assert_equal expected_sql, @dialect.sql_for_create(translated_values)
       end
-
     end
-  
+    # given "and with a hash of values, create a persisted instance of TestSqliteModel," do
+    #   which_means do
+    #     values = { :name => "Lily G", :age => 0, :tagline => "Ooooooooohhh!" }
+    # 
+    #     @model = TestSqliteModel.create values
+    #   end
+    #   
+    #   test "assigns an id to the model" do
+    #     assert_not_nil model[:id]
+    #   end
+    #   
+    #   test "populates the model with the values from the hash" do
+    #   end
+    # end
   end
 end
 
