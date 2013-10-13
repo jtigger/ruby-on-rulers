@@ -38,6 +38,10 @@ module Rulers
       def sql_for_get_id
         "SELECT last_insert_rowid();"
       end
+      
+      def sql_for_table_size
+        "SELECT COUNT(*) from #{@table_name};"
+      end
     end
     
     class SQLiteModel
@@ -67,6 +71,10 @@ module Rulers
       
       def [](attribute)
         @values[attribute] if @values
+      end
+      
+      def self.count
+        @db.execute(@dialect.sql_for_table_size)[0][0]
       end
       
       protected

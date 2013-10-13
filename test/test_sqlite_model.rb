@@ -17,8 +17,8 @@ class RulersSQLiteModelTest < Test::Unit::TestCase
       database_filename = "#{@build_test_temp_dir}/test.db"
 
       `mkdir -p #{@build_test_temp_dir}`
-      conn = SQLite3::Database.new database_filename
-      conn.execute_batch <<__
+      @conn = SQLite3::Database.new database_filename
+      @conn.execute_batch <<__
       drop table if exists test_sqlite;
       create table test_sqlite (
         id      INTEGER PRIMARY KEY,
@@ -42,7 +42,7 @@ __
       expected_schema = { "id" => "INTEGER", "name" => "VARCHAR(30)", "age" => "INTEGER", "tagline" => "VARCHAR(80)"}
       assert_equal expected_schema, TestSqliteModel.schema
     end
-    
+        
     given "and using the SQLiteDialect to generate SQL" do
       which_means do
         @dialect = Rulers::Model::SQLiteDialect.new(TestSqliteModel.table, TestSqliteModel.schema)
@@ -77,7 +77,22 @@ __
       test "generates the SQL required to get the ID of the just-inserted row" do
         assert_equal "SELECT last_insert_rowid();", @dialect.sql_for_get_id
       end
+      
+      test "generates SQL required to get the number of rows in the table" do
+        assert_equal "SELECT COUNT(*) from test_sqlite;", @dialect.sql_for_table_size
+      end
     end
+    
+    test "reports the number of instances of this model in the database" do
+      assert_equal 0, TestSqliteModel.count
+      @conn.execute_batch <<__
+      INSERT INTO test_sqlite (name, age, tagline) values ('John', 40, 'Nothin but net');
+      INSERT INTO test_sqlite (name, age, tagline) values ('John', 40, 'Nothin but net');
+__
+      assert_equal 2, TestSqliteModel.count
+    end
+
+    
     given "and with a hash of values, create a persisted instance of TestSqliteModel," do
       which_means do
         values = { :name => "Lily G", :age => 0, :tagline => "Ooooooooohhh!" }
