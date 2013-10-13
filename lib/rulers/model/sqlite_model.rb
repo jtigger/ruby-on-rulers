@@ -59,13 +59,20 @@ module Rulers
       end
       
       def self.create(values)
-        insert_sql = @dialect.sql_for_create Hash[schema.keys.zip(@dialect.to_sql(values))]
-        puts insert_sql
+        insert_sql = @dialect.sql_for_create @dialect.to_sql(values)
         @db.execute insert_sql
         id = @db.execute(@dialect.sql_for_get_id)[0][0]
-        self.new
+        self.new({ :id => id }.merge(values))
       end
       
+      def [](attribute)
+        @values[attribute] if @values
+      end
+      
+      protected
+      def initialize(values)
+        @values = values
+      end
     end
   end
 end

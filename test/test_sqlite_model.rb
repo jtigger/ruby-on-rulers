@@ -73,21 +73,29 @@ __
 
         assert_equal expected_sql, @dialect.sql_for_create(translated_values)
       end
+      
+      test "generates the SQL required to get the ID of the just-inserted row" do
+        assert_equal "SELECT last_insert_rowid();", @dialect.sql_for_get_id
+      end
     end
-    # given "and with a hash of values, create a persisted instance of TestSqliteModel," do
-    #   which_means do
-    #     values = { :name => "Lily G", :age => 0, :tagline => "Ooooooooohhh!" }
-    # 
-    #     @model = TestSqliteModel.create values
-    #   end
-    #   
-    #   test "assigns an id to the model" do
-    #     assert_not_nil model[:id]
-    #   end
-    #   
-    #   test "populates the model with the values from the hash" do
-    #   end
-    # end
+    given "and with a hash of values, create a persisted instance of TestSqliteModel," do
+      which_means do
+        values = { :name => "Lily G", :age => 0, :tagline => "Ooooooooohhh!" }
+    
+        @model = TestSqliteModel.create values
+      end
+      
+      test "assigns a valid id to the model" do
+        assert_not_nil @model[:id]
+        assert @model[:id].to_i > 0  # valid = positive integer
+      end
+      
+      test "populates the model with the values from the hash" do
+        assert_equal "Lily G", @model[:name]
+        assert_equal 0, @model[:age]
+        assert_equal "Ooooooooohhh!", @model[:tagline]
+      end
+    end
   end
 end
 
