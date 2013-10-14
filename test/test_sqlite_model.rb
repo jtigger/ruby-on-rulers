@@ -69,9 +69,16 @@ __
         assert_equal "NULL", @dialect.to_sql(nil)
       end
 
-      test "translates hashes into hashes of translated values" do
+      test "translates hashes into hashes of translated values (keys are symbols)" do
         values = { :name => "Lily G", :age => 0, :tagline => "Ooooooooohhh!" }
         sql_escaped_values = { :name => "'Lily G'", :age => "0", :tagline => "'Ooooooooohhh!'"}
+
+        assert_equal sql_escaped_values, @dialect.to_sql(values)
+      end
+
+      test "translates hashes into hashes of translated values (keys are strings)" do
+        values = { "name" => "Lily G", "age" => 0, "tagline" => "Ooooooooohhh!" }
+        sql_escaped_values = { "name" => "'Lily G'", "age" => "0", "tagline" => "'Ooooooooohhh!'"}
 
         assert_equal sql_escaped_values, @dialect.to_sql(values)
       end
