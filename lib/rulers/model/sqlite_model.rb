@@ -87,6 +87,10 @@ module Rulers
       def [](attribute)
         @values[attribute] if @values
       end
+      
+      def []=(attribute, new_value)
+        @values[attribute] = new_value 
+      end
             
       protected
       def initialize(values)

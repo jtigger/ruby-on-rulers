@@ -132,6 +132,11 @@ __
         assert_not_nil fetched_model, "expected to find the saved model (id = #{@model[:id]}), but got nil instead."
         assert_equal fetched_model[:id], @model[:id]
       end
+      
+      test "whos attribute values can be modified by using []=" do
+        @model[:age] = 42
+        assert_equal 42, @model[:age]
+      end
     end
   end
 end

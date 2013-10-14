@@ -2,6 +2,7 @@
 
 SQLiteModel
 [ ] Scrub "id" in sql_for_find_by_id() (security: tainted-data)
+[ ] []=() verify that "attribute" is in the schema for the table.
 [ ] Add check to make sure we're connected before doing anything. (and raise an exception if not)
 [ ] In all generated SQL, capitalize SQL keywords
 [x] Add logic to connect to a given database.
