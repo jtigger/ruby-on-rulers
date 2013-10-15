@@ -1,7 +1,17 @@
+class Module
+  def remove_possible_method(name)
+    if method_defined?(name) || private_method_defined?(name)
+      undef_method(name)
+    end
+  end
+end
 
 class Class
   def class_attribute(attr)
     define_singleton_method(attr) { nil }
+    define_singleton_method("#{attr}=") do |new_value|
+      
+    end
   end
 end
 
