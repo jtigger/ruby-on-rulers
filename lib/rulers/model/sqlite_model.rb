@@ -35,6 +35,13 @@ module Rulers
         "INSERT INTO #{@table_name} (#{column_value_pairs.keys.join(", ")}) values (#{column_value_pairs.values.join(", ")});"
       end
       
+      def sql_for_update(values)
+        quoted_values = to_sql(values)
+        quoted_id = quoted_values.delete(:id)
+        set_clause = quoted_values.map { |column, quoted_value| "#{column} = #{quoted_value}" }.join(", ")
+        "UPDATE #{@table_name} SET #{set_clause} WHERE id = #{quoted_id};"
+      end
+      
       def sql_for_get_id
         "SELECT last_insert_rowid();"
       end
@@ -54,7 +61,7 @@ module Rulers
         @db = SQLite3::Database.new path_to_db
         @dialect = SQLiteDialect.new table, schema
       end
-      
+            
       def self.table
         name.to_snake_case.gsub /_model$/, ''
       end
@@ -71,7 +78,7 @@ module Rulers
         insert_sql = @dialect.sql_for_create @dialect.to_sql(values)
         @db.execute insert_sql
         id = @db.execute(@dialect.sql_for_get_id)[0][0]
-        self.new({ :id => id }.merge(values))
+        new({ :id => id }.merge(values))
       end
       
       def self.find_by_id(id)
@@ -91,6 +98,11 @@ module Rulers
       def []=(attribute, new_value)
         @values[attribute] = new_value 
       end
+      
+      # def save
+      #   dialect = SQLiteModel.instance_variable_get(:@dialect)
+      #   update_sql = dialect.sql_for_update @values
+      # end
             
       protected
       def initialize(values)

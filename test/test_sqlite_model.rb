@@ -102,10 +102,18 @@ __
         sql, projection_list = @dialect.sql_for_find_by_id(4)
         assert_equal "SELECT id, name, age, tagline FROM test_sqlite WHERE id = 4", sql
       end
+      
       test "when generating SQL required to fetch a specific row by id, also returns the projection list" do
         expected_projection_list = ["id", "name", "age", "tagline"]
         sql, projection_list = @dialect.sql_for_find_by_id(4)
         assert_equal expected_projection_list, projection_list
+      end
+      
+      test "generates SQL required to update a row, given the values of an instance of a model" do
+        values = { :id => 1023, :name => "Lily G", :age => 0, :tagline => "Ooooooooohhh!" }
+        expected_insert_sql = "UPDATE test_sqlite SET name = 'Lily G', age = 0, tagline = 'Ooooooooohhh!' WHERE id = 1023;"
+        
+        assert_equal expected_insert_sql, @dialect.sql_for_update(values)
       end
     end
     
@@ -137,6 +145,16 @@ __
         @model[:age] = 42
         assert_equal 42, @model[:age]
       end
+      
+      # test "and attributes of that instance are modified and saved, those changes persist" do
+      #   @model[:age] = 42
+      #   @model[:tagline] += "  Ahhhhhhhh!"
+      #   @model.save
+      #   fetched_model = TestSqliteModel.find_by_id(@model[:id])
+      #   
+      #   assert_equal 42, fetched_model[:age]
+      #   assert_equal "  Ahhhhhhhh!", fetched_model[:tagline]
+      # end
     end
   end
 end

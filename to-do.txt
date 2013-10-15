@@ -3,6 +3,7 @@
 SQLiteModel
 [ ] Scrub "id" in sql_for_find_by_id() (security: tainted-data)
 [ ] []=() verify that "attribute" is in the schema for the table.
+[ ] Clarify the use of strings and symbols when referring to attributes: raw values (e.g. used to create an instance of a model) can be either, for convenience's sake; but the keys of the hash backing a model instance (persisted or not) will ALWAYS be symbols.
 [ ] Add check to make sure we're connected before doing anything. (and raise an exception if not)
 [ ] In all generated SQL, capitalize SQL keywords
 [x] Add logic to connect to a given database.
