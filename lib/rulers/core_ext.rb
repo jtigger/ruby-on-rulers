@@ -1,4 +1,10 @@
 
+class Class
+  def class_attribute(attr)
+    define_singleton_method(attr) { nil }
+  end
+end
+
 class String
   def to_camel_case
     split(/[_ ]/).map { |word| word.capitalize }.join ''
