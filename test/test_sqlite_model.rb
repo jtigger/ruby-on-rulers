@@ -51,6 +51,18 @@ __
 __
       assert_equal 2, TestSqliteModel.count
     end
+    
+    test "provides accessors that allow you to get and set values for attributes matching column names" do
+      model = TestSqliteModel.create({ :name => "Filbert" })
+      
+      model.name = "Filbert, the Great"
+      model.age = 32
+      model.tagline = "I'm a happy guy."
+      
+      assert_equal "Filbert, the Great", model.name
+      assert_equal 32, model.age
+      assert_equal "I'm a happy guy.", model.tagline
+    end
         
     given "and using the SQLiteDialect to generate SQL" do
       which_means do

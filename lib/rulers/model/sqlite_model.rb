@@ -93,6 +93,21 @@ module Rulers
       def self.count
         self.db.execute(self.dialect.sql_for_table_size)[0][0]
       end
+      
+      def method_missing(meth, *args, &block)
+        attribute = meth.to_s.gsub(/=$/,'')
+        if self.class.schema.keys.include? attribute
+          self.class.class_eval do
+            define_method(attribute) do
+              self.send(:[], attribute)
+            end
+            define_method("#{attribute}=") do |new_value|
+              self.send(:[]=, attribute, new_value)
+            end
+          end
+          public_send(meth, *args)
+        end
+      end
 
       def [](attribute)
         @values[attribute] if @values
