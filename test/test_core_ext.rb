@@ -45,16 +45,12 @@ class ModuleExtTest < Test::Unit::TestCase
   end
   
   def test_GIVEN_a_method_is_NOT_defined_on_a_module_THEN_remove_possible_method_quietly_ignores
-    TestClasses::Foo.class_eval do
-      def ree
-      end
-    end
+    TestClasses::Foo.class_eval { def ree; end }
+
     foo = TestClasses::Foo.new
     assert !foo.respond_to?(:bar)
     
-    TestClasses::Foo.class_eval do
-      remove_possible_method :bar
-    end
+    TestClasses::Foo.class_eval { remove_possible_method :bar }
     
     assert !foo.respond_to?(:bar), "expected method 'bar' to be removed, but it's still there."
   end
@@ -83,6 +79,18 @@ class ClassExtTest < Test::Unit::TestCase
     assert_nil TestClasses::Bar.ree
   end
   
+  def test_class_attribute__provides_reader_and_writer_on_instances_of_the_class
+    TestClasses::Foo.class_eval "class_attribute :ree"
+
+    TestClasses::Foo.ree = 42
+    foo = TestClasses::Foo.new
+    assert_equal 42, foo.ree, "expected instance of Foo to also have access to class attribute"
+    
+    TestClasses::Foo.ree = 157
+    assert_equal 157, foo.ree, "expected instance of Foo to be affected by assignment to class attribute on Foo (the class) itself"
+  end
+  
+    
   def test_class_attribute__GIVEN_subclass_has_no_value_defined_THEN_assignments_to_variable_applies_to_both_base_class_and_subclass
     TestClasses::Foo.class_eval "class_attribute :ree"
     
@@ -101,4 +109,5 @@ class ClassExtTest < Test::Unit::TestCase
     assert_equal 42, TestClasses::Foo.ree, "assignment failed for the base class"
     assert_equal 157, TestClasses::Bar.ree, "assignment worked for the base class, but not the subclass"
   end
+  
 end

@@ -18,6 +18,12 @@ class Class
         define_method(attr) { new_value }
       end
     end
+    
+    class_eval do
+      define_method(attr) do
+        self.class.public_send(attr)
+      end
+    end
   end
 end
 
