@@ -57,9 +57,12 @@ module Rulers
     end
     
     class SQLiteModel
+      class_attribute :db
+      class_attribute :dialect
+      
       def self.connect(path_to_db)
-        @db = SQLite3::Database.new path_to_db
-        @dialect = SQLiteDialect.new table, schema
+        self.db = SQLite3::Database.new path_to_db
+        self.dialect = SQLiteDialect.new table, schema
       end
             
       def self.table
@@ -68,27 +71,27 @@ module Rulers
       
       def self.schema
         @schema = {}
-        @db.table_info(table) do |row|
+        self.db.table_info(table) do |row|
           @schema[row["name"]] = row["type"]
         end
         @schema
       end
       
       def self.create(values)
-        insert_sql = @dialect.sql_for_create @dialect.to_sql(values)
-        @db.execute insert_sql
-        id = @db.execute(@dialect.sql_for_get_id)[0][0]
+        insert_sql = self.dialect.sql_for_create self.dialect.to_sql(values)
+        self.db.execute insert_sql
+        id = db.execute(dialect.sql_for_get_id)[0][0]
         new({ :id => id }.merge(values))
       end
       
       def self.find_by_id(id)
-        select_sql, projection_list = @dialect.sql_for_find_by_id(id)
-        rows = @db.execute select_sql
+        select_sql, projection_list = self.dialect.sql_for_find_by_id(id)
+        rows = db.execute select_sql
         values = Hash[projection_list.map {|column_name| column_name.to_sym}.zip(rows[0])]
       end
 
       def self.count
-        @db.execute(@dialect.sql_for_table_size)[0][0]
+        self.db.execute(self.dialect.sql_for_table_size)[0][0]
       end
 
       def [](attribute)
@@ -99,10 +102,10 @@ module Rulers
         @values[attribute] = new_value 
       end
       
-      # def save
-      #   dialect = SQLiteModel.instance_variable_get(:@dialect)
-      #   update_sql = dialect.sql_for_update @values
-      # end
+      def save
+        update_sql = self.dialect.sql_for_update @values
+        self.db.execute update_sql
+      end
             
       protected
       def initialize(values)

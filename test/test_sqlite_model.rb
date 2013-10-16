@@ -146,15 +146,15 @@ __
         assert_equal 42, @model[:age]
       end
       
-      # test "and attributes of that instance are modified and saved, those changes persist" do
-      #   @model[:age] = 42
-      #   @model[:tagline] += "  Ahhhhhhhh!"
-      #   @model.save
-      #   fetched_model = TestSqliteModel.find_by_id(@model[:id])
-      #   
-      #   assert_equal 42, fetched_model[:age]
-      #   assert_equal "  Ahhhhhhhh!", fetched_model[:tagline]
-      # end
+      test "and attributes of that instance are modified and saved, those changes persist" do
+        @model[:age] = 42
+        @model[:tagline] += "  Ahhhhhhhh!"
+        @model.save
+        fetched_model = TestSqliteModel.find_by_id(@model[:id])
+        
+        assert_equal 42, fetched_model[:age]
+        assert_equal "Ooooooooohhh!  Ahhhhhhhh!", fetched_model[:tagline]
+      end
     end
   end
 end
