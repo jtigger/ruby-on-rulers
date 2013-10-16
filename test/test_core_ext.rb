@@ -60,7 +60,6 @@ class ModuleExtTest < Test::Unit::TestCase
   end
 end
 
-
 class ClassExtTest < Test::Unit::TestCase
   def setup
     TestClasses.module_eval "class Foo; end"
@@ -84,14 +83,22 @@ class ClassExtTest < Test::Unit::TestCase
     assert_nil TestClasses::Bar.ree
   end
   
-  # def test_class_attribute__GIVEN_subclass_has_no_value_defined_THEN_assignments_to_variable_applies_to_both_base_class_and_subclass
-  #   TestClasses::Foo.class_eval "class_attribute :ree"
-  #   
-  #   TestClasses::Foo.ree = 42
-  #   
-  #   assert_equal 42, TestClasses::Foo.ree, "assignment failed for the base class"
-  #   assert_equal 42, TestClasses::Bar.ree, "assignment worked for the base class, but not the subclass"
-  # end
+  def test_class_attribute__GIVEN_subclass_has_no_value_defined_THEN_assignments_to_variable_applies_to_both_base_class_and_subclass
+    TestClasses::Foo.class_eval "class_attribute :ree"
+    
+    TestClasses::Foo.ree = 42
+    
+    assert_equal 42, TestClasses::Foo.ree, "assignment failed for the base class"
+    assert_equal 42, TestClasses::Bar.ree, "assignment worked for the base class, but not the subclass"
+  end
+  
   def test_class_attribute__GIVEN_subclass_HAS_a_value_defined_THEN_assignments_to_variable_applies_to_only_subclass
+    TestClasses::Foo.class_eval "class_attribute :ree"
+    
+    TestClasses::Foo.ree = 42
+    TestClasses::Bar.ree = 157
+    
+    assert_equal 42, TestClasses::Foo.ree, "assignment failed for the base class"
+    assert_equal 157, TestClasses::Bar.ree, "assignment worked for the base class, but not the subclass"
   end
 end

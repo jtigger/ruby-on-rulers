@@ -8,9 +8,15 @@ end
 
 class Class
   def class_attribute(attr)
+    # define the reader
     define_singleton_method(attr) { nil }
+    
+    # the writer simply redefines the reader
     define_singleton_method("#{attr}=") do |new_value|
-      
+      singleton_class.class_eval do
+        remove_possible_method(attr)
+        define_method(attr) { new_value }
+      end
     end
   end
 end
