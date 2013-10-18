@@ -2,60 +2,6 @@
 
 module Rulers
   module Model
-    
-    # Generates valid SQL strings, suitable to execute against a SQLite database.
-    class SQLiteDialect
-      def initialize(table_name, schema)
-        @table_name = table_name
-        @schema = schema
-      end
-      
-      def to_sql(value)
-        case value
-        when Hash
-          quoted_values = value.keys.map do |key|
-            if @schema.keys.include?(key.to_s) || @schema.keys.include?(key.to_sym)
-              value_for_key = value[key]
-              [key, to_sql(value_for_key)]
-            end
-          end
-          Hash[quoted_values]
-        when Numeric
-          value.to_s
-        when String
-          "'#{value}'"
-        when nil
-          "NULL"
-        else
-          raise "Unable to map #{value} (an instance of #{value.class}) to SQL."
-        end
-      end
-      
-      def sql_for_create(column_value_pairs)
-        "INSERT INTO #{@table_name} (#{column_value_pairs.keys.join(", ")}) values (#{column_value_pairs.values.join(", ")});"
-      end
-      
-      def sql_for_update(values)
-        quoted_values = to_sql(values)
-        quoted_id = quoted_values.delete(:id)
-        set_clause = quoted_values.map { |column, quoted_value| "#{column} = #{quoted_value}" }.join(", ")
-        "UPDATE #{@table_name} SET #{set_clause} WHERE id = #{quoted_id};"
-      end
-      
-      def sql_for_get_id
-        "SELECT last_insert_rowid();"
-      end
-      
-      def sql_for_table_size
-        "SELECT COUNT(*) from #{@table_name};"
-      end
-      
-      def sql_for_find_by_id(id)
-        projection_list = @schema.keys
-        ["SELECT #{projection_list.join(", ")} FROM #{@table_name} WHERE id = #{id}", projection_list]
-      end
-    end
-    
     class SQLiteModel
       class_attribute :db
       class_attribute :dialect
@@ -132,6 +78,59 @@ module Rulers
           end
         end
         public_send(method, *args)
+      end
+    end
+    
+    # Generates valid SQL strings, suitable to execute against a SQLite database.
+    class SQLiteDialect
+      def initialize(table_name, schema)
+        @table_name = table_name
+        @schema = schema
+      end
+      
+      def to_sql(value)
+        case value
+        when Hash
+          quoted_values = value.keys.map do |key|
+            if @schema.keys.include?(key.to_s) || @schema.keys.include?(key.to_sym)
+              value_for_key = value[key]
+              [key, to_sql(value_for_key)]
+            end
+          end
+          Hash[quoted_values]
+        when Numeric
+          value.to_s
+        when String
+          "'#{value}'"
+        when nil
+          "NULL"
+        else
+          raise "Unable to map #{value} (an instance of #{value.class}) to SQL."
+        end
+      end
+      
+      def sql_for_create(column_value_pairs)
+        "INSERT INTO #{@table_name} (#{column_value_pairs.keys.join(", ")}) values (#{column_value_pairs.values.join(", ")});"
+      end
+      
+      def sql_for_update(values)
+        quoted_values = to_sql(values)
+        quoted_id = quoted_values.delete(:id)
+        set_clause = quoted_values.map { |column, quoted_value| "#{column} = #{quoted_value}" }.join(", ")
+        "UPDATE #{@table_name} SET #{set_clause} WHERE id = #{quoted_id};"
+      end
+      
+      def sql_for_get_id
+        "SELECT last_insert_rowid();"
+      end
+      
+      def sql_for_table_size
+        "SELECT COUNT(*) from #{@table_name};"
+      end
+      
+      def sql_for_find_by_id(id)
+        projection_list = @schema.keys
+        ["SELECT #{projection_list.join(", ")} FROM #{@table_name} WHERE id = #{id}", projection_list]
       end
     end
   end
