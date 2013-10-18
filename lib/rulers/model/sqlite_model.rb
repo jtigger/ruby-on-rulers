@@ -95,18 +95,7 @@ module Rulers
       end
       
       def method_missing(meth, *args, &block)
-        attribute = meth.to_s.gsub(/=$/,'')
-        if self.class.schema.keys.include? attribute
-          self.class.class_eval do
-            define_method(attribute) do
-              self.send(:[], attribute)
-            end
-            define_method("#{attribute}=") do |new_value|
-              self.send(:[]=, attribute, new_value)
-            end
-          end
-          public_send(meth, *args)
-        end
+        delegate_to_accessor(meth, *args, &block) if is_attr_accessor(meth)
       end
 
       def [](attribute)
@@ -125,6 +114,24 @@ module Rulers
       protected
       def initialize(values)
         @values = values
+      end
+      
+      private
+      def is_attr_accessor(method)
+        self.class.schema.keys.include? method.to_s.gsub(/=$/,'')
+      end
+      
+      def delegate_to_accessor(method, *args, &block)
+        attribute = method.to_s.gsub(/=$/,'')
+        self.class.class_eval do
+          define_method(attribute) do
+            self.send(:[], attribute)
+          end
+          define_method("#{attribute}=") do |new_value|
+            self.send(:[]=, attribute, new_value)
+          end
+        end
+        public_send(method, *args)
       end
     end
   end
