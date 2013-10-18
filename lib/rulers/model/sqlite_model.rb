@@ -17,27 +17,27 @@ module Rulers
       
       def self.schema
         @schema = {}
-        self.db.table_info(table) do |row|
+        db.table_info(table) do |row|
           @schema[row["name"]] = row["type"]
         end
         @schema
       end
       
       def self.create(values)
-        insert_sql = self.dialect.sql_for_create self.dialect.to_sql(values)
-        self.db.execute insert_sql
+        insert_sql = dialect.sql_for_create self.dialect.to_sql(values)
+        db.execute insert_sql
         id = db.execute(dialect.sql_for_get_id)[0][0]
         new({ :id => id }.merge(values))
       end
       
       def self.find_by_id(id)
-        select_sql, projection_list = self.dialect.sql_for_find_by_id(id)
+        select_sql, projection_list = dialect.sql_for_find_by_id(id)
         rows = db.execute select_sql
         values = Hash[projection_list.map {|column_name| column_name.to_sym}.zip(rows[0])]
       end
 
       def self.count
-        self.db.execute(self.dialect.sql_for_table_size)[0][0]
+        db.execute(dialect.sql_for_table_size)[0][0]
       end
       
       def method_missing(meth, *args, &block)
@@ -53,8 +53,8 @@ module Rulers
       end
       
       def save
-        update_sql = self.dialect.sql_for_update @values
-        self.db.execute update_sql
+        update_sql = dialect.sql_for_update @values
+        db.execute update_sql
       end
             
       protected
