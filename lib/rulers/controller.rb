@@ -13,7 +13,7 @@ module Rulers
       @routing_params = {}
     end
     
-    def self.make_rack_app(action, request_params = {})
+    def self.rack_app_for(action, request_params = {})
       proc { |env| self.new(env).dispatch(action, request_params) }
     end
     

@@ -16,7 +16,7 @@ module Rulers
           
         else
           klass, action = get_controller_and_action request
-          rack_app = klass.make_rack_app action
+          rack_app = klass.rack_app_for action
           begin
             rack_app.call env
           rescue Exception => e
