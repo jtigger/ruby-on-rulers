@@ -24,6 +24,7 @@ module Rulers
         @id = FileModel.get_id_from_pathname(pathname)
         @pathname = pathname
         @hash = MultiJson.load fetch_data(pathname)
+        @hash["id"] = @id
       end
       
       def fetch_data(pathname)

@@ -5,21 +5,32 @@ require "rulers/model"
 module Rulers
   class Controller
     include Rulers::Model
-
-    def initialize(request)
-      @request = request
-    end
-
-    def request
-      @request
+    attr_reader :request
+    attr_reader :response
+    
+    def initialize(env)
+      @request = Rack::Request.new(env)
+      @routing_params = {}
     end
     
-    def response
-      @response
+    def self.make_rack_app(action, request_params = {})
+      proc { |env| self.new(env).dispatch(action, request_params) }
+    end
+    
+    def dispatch(action, routing_params = {})
+      @routing_params = routing_params
+      response_body = self.send(action)
+      self.render_response action unless response_body
+      if self.response
+        status, header, response = self.response.to_a
+        [status, header, [response.body].flatten]
+      else
+        [200, {'Content-Type' => 'text/html'}, [response_body]]
+      end
     end
     
     def params
-      @request.params
+      @request.params.merge @routing_params
     end
     
     def name

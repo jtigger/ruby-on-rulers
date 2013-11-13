@@ -37,12 +37,10 @@ __
     test "assumes the backing table matches the classname" do
       assert_equal "test_sqlite", TestSqliteModel.table
     end
-    
     test "reads the schema from the database" do
       expected_schema = { "id" => "INTEGER", "name" => "VARCHAR(30)", "age" => "INTEGER", "tagline" => "VARCHAR(80)"}
       assert_equal expected_schema, TestSqliteModel.schema
     end
-
     test "reports the count of instances of this model in the database" do
       assert_equal 0, TestSqliteModel.count
       @conn.execute_batch <<__
@@ -51,7 +49,6 @@ __
 __
       assert_equal 2, TestSqliteModel.count
     end
-    
     test "provides accessors that allow you to get and set values for attributes matching column names" do
       model = TestSqliteModel.create({ :name => "Filbert" })
       

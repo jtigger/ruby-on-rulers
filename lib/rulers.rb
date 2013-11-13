@@ -6,8 +6,7 @@ require_rel "rulers"
 module Rulers
   class Application
     def call(env)
-      request = Rack::Request.new(env)
-
+      request = Rack::Request.new env
       case request.path
         when '/favicon.ico'
           return [404, {'Content-Type' => 'text/html'}, []]
@@ -16,17 +15,10 @@ module Rulers
           return [302, {'Location' => '/home/index'}, []]
           
         else
-          klass, action = get_controller_and_action(request)
-          controller = klass.new(request)
+          klass, action = get_controller_and_action request
+          rack_app = klass.make_rack_app action
           begin
-            response_body = controller.send(action)
-            controller.render_response action unless response_body
-            if controller.response
-              status, header, response = controller.response.to_a
-              [status, header, [response.body].flatten]
-            else
-              [200, {'Content-Type' => 'text/html'}, [response_body]]
-            end
+            rack_app.call env
           rescue Exception => e
             error_html = "<pre>" + e.message + "\n" + e.backtrace.join("\n") + "</pre>"
             return [500, {'Content-Type' => 'text/html'}, [error_html]]
