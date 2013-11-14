@@ -40,6 +40,10 @@ class Route
     })
   end
   
+  def root(*args)
+    match "/", *args
+  end
+  
   def check_url(url)
     @rules.each do |rule|
       matches = rule[:regexp].match url
