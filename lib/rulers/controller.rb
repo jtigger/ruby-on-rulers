@@ -23,10 +23,11 @@ module Rulers
       self.render_response action unless response_body
       if self.response
         status, header, response = self.response.to_a
-        [status, header, [response.body].flatten]
+        result = [status, header, [response.body].flatten]
       else
-        [200, {'Content-Type' => 'text/html'}, [response_body]]
+        result = [200, {'Content-Type' => 'text/html'}, [response_body]]
       end
+      result
     end
     
     def params
